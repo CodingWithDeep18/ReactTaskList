@@ -6,6 +6,7 @@ import { useGetPokemonListQuery } from "../api/apiSlice";
 const columns: GridColDef[] = [
   { field: "id", headerName: "ID", width: 100 },
   { field: "name", headerName: "Name", width: 200 },
+  { field: "url", headerName: "Url", width: 300},
 ];
 
 const DataGridComponent: React.FC = () => {
@@ -13,6 +14,7 @@ const DataGridComponent: React.FC = () => {
   const { data: pokemonData, isLoading } = useGetPokemonListQuery({
     limit: 50,
   });
+  console.log(pokemonData)
 
   if (isLoading) return <div>Loading...</div>;
 
@@ -29,6 +31,7 @@ const DataGridComponent: React.FC = () => {
   const rows = filteredData.map((pokemon, index) => ({
     id: index + 1,
     name: pokemon.name,
+    url: pokemon.url,
   }));
 
   return (
@@ -43,7 +46,7 @@ const DataGridComponent: React.FC = () => {
       <div>
         <h2>Pokeman DataGrid Api</h2>
         <SearchBar setSearchQuery={setSearchQuery} />
-        <div style={{ height: 400, width: "100%" }}>
+        <div style={{ height: 400, width: "700px" }}>
           <DataGrid
             rows={rows}
             columns={columns}
