@@ -1,19 +1,18 @@
 import React from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import "../App.css";
 import {
   TextField,
   Button,
-  Typography,
   Container,
   Grid,
   Box,
 } from "@mui/material";
 
 const schema = yup.object().shape({
-  name: yup.string().required("Name is required"),
+  name: yup.string().trim().required("Name is required").matches(/^\S.*\S$/, 'Name cannot contain empty spaces'),
   email: yup.string().email("Invalid email format").required("Email is required"),
   age: yup.number().typeError("Age must be a number"),
   educations: yup
@@ -44,162 +43,144 @@ const EducationForm = () => {
     handleSubmit,
     control,
     formState: { errors, isValid },
-  } = useForm({ resolver: yupResolver(schema), mode: "onChange" });
+  } = useForm({ resolver: yupResolver(schema), mode: "onChange", defaultValues: { educations: [] } });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "educations",
+  });
 
   const onSubmit = (data) => console.log(data);
 
   return (
     <Container>
       <Box className="form-container">
-        <Typography variant="h4" gutterBottom className="form-title">
-          Education Form
-        </Typography>
+        <h2 className="form-title">Education Form</h2>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>
-                Name <span className="required">*</span>
-              </Typography>
               <TextField
+                required
                 fullWidth
+                label="Name"
                 {...register("name")}
                 error={errors.name}
                 helperText={errors.name?.message}
-                className="form-field"
               />
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>
-                Email <span className="required">*</span>
-              </Typography>
               <TextField
+                required
                 fullWidth
+                label="Email"
                 {...register("email")}
                 error={errors.email}
                 helperText={errors.email?.message}
-                className="form-field"
               />
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>
-                Age
-              </Typography>
               <TextField
                 fullWidth
                 type="number"
+                label="Age"
                 {...register("age")}
                 error={errors.age}
                 helperText={errors.age?.message}
-                className="form-field"
+                inputMode="numeric"
               />
             </Grid>
             <Grid item xs={12}>
-              <Controller
-                name="educations"
-                control={control}
-                defaultValue={[]}
-                render={({ field: { value = [], onChange } }) => (
-                  <div style={{ marginBottom: "20px" }}>
-                    {value.map((education, index) => (
-                      <div key={index} style={{ marginBottom: "20px" }}>
-                        <Typography variant="h6" gutterBottom>
-                          School Name <span className="required">*</span>
-                        </Typography>
-                        <TextField
-                          fullWidth
-                          {...register(`educations.${index}.schoolName`)}
-                          error={errors.educations?.[index]?.schoolName}
-                          helperText={
-                            errors.educations?.[index]?.schoolName?.message
-                          }
-                          className="form-field"
-                        />
-                        <Typography variant="h6" gutterBottom>
-                          Degree <span className="required">*</span>
-                        </Typography>
-                        <TextField
-                          fullWidth
-                          {...register(`educations.${index}.degree`)}
-                          error={errors.educations?.[index]?.degree}
-                          helperText={
-                            errors.educations?.[index]?.degree?.message
-                          }
-                          className="form-field"
-                        />
-                        <Typography variant="h6" gutterBottom>
-                          Description
-                        </Typography>
-                        <TextField
-                          fullWidth
-                          {...register(`educations.${index}.description`)}
-                          error={errors.educations?.[index]?.description}
-                          helperText={
-                            errors.educations?.[index]?.description?.message
-                          }
-                          className="form-field"
-                        />
-                        <Typography variant="h6" gutterBottom>
-                          Start Date <span className="required">*</span>
-                        </Typography>
-                        <TextField
-                          fullWidth
-                          type="date"
-                          {...register(`educations.${index}.startDate`)}
-                          InputLabelProps={{ shrink: true }}
-                          error={errors.educations?.[index]?.startDate}
-                          helperText={
-                            errors.educations?.[index]?.startDate?.message
-                          }
-                          className="form-field"
-                        />
-                        <Typography variant="h6" gutterBottom>
-                          End Date
-                        </Typography>
-                        <TextField
-                          fullWidth
-                          type="date"
-                          {...register(`educations.${index}.endDate`)}
-                          InputLabelProps={{ shrink: true }}
-                          error={errors.educations?.[index]?.endDate}
-                          helperText={
-                            errors.educations?.[index]?.endDate?.message
-                          }
-                          className="form-field"
-                        />
-                      </div>
-                    ))}
-                    <Grid container justifyContent="center">
-                        <Button
-                          type="button"
-                          onClick={() => onChange([...value, {}])}
-                          variant="contained"
-                          color="primary"
-                          className="submit-button"
-                        >
-                          Add Education
-                        </Button>
-                      </Grid>
-                  </div>
-                )}
-              />
+              {fields.map((education, index) => (
+                <Box key={education.id} >
+                  <TextField
+                    required
+                    fullWidth
+                    label="School Name"
+                    sx={{ marginBottom: 2 }}
+                    {...register(`educations.${index}.schoolName`)}
+                    error={errors.educations?.[index]?.schoolName}
+                    helperText={errors.educations?.[index]?.schoolName?.message}
+                  />
+                  <TextField
+                    required
+                    fullWidth
+                    label="Degree"
+                    sx={{ marginBottom: 2 }}
+                    {...register(`educations.${index}.degree`)}
+                    error={errors.educations?.[index]?.degree}
+                    helperText={errors.educations?.[index]?.degree?.message}
+                  />
+                  <TextField
+                    fullWidth
+                    label="Description"
+                    sx={{ marginBottom: 2 }}
+                    {...register(`educations.${index}.description`)}
+                    error={errors.educations?.[index]?.description}
+                    helperText={errors.educations?.[index]?.description?.message}
+                  />
+                  <TextField
+                    required
+                    fullWidth
+                    type="date"
+                    label="Start Date"
+                    sx={{ marginBottom: 2 }}
+                    {...register(`educations.${index}.startDate`)}
+                    InputLabelProps={{ shrink: true }}
+                    error={errors.educations?.[index]?.startDate}
+                    helperText={errors.educations?.[index]?.startDate?.message}
+                  />
+                  <TextField
+                    fullWidth
+                    type="date"
+                    label="End Date"
+                    sx={{ marginBottom: 2 }}
+                    {...register(`educations.${index}.endDate`)}
+                    InputLabelProps={{ shrink: true }}
+                    error={errors.educations?.[index]?.endDate}
+                    helperText={errors.educations?.[index]?.endDate?.message}
+                  />
+                  {index > 0 && (
+                    <Button
+                      fullWidth
+                      type="button"
+                      onClick={() => remove(index)}
+                      variant="contained"
+                      color="secondary"
+                      sx={{ marginTop: 2, marginBottom: 2}}
+                    >
+                      Remove Education
+                    </Button>
+                  )}
+                </Box>
+              ))}
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+              fullWidth
+                type="button"
+                onClick={() => append({})}
+                variant="contained"
+                color="primary"
+              >
+                Add Education
+              </Button>
               {errors.educations && (
-                <Typography color="error">
+                <p className="error-message">
                   {errors.educations.message}
-                </Typography>
+                </p>
               )}
             </Grid>
           </Grid>
-          <Grid container justifyContent="center">
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                disabled={!isValid}
-                className="submit-button"
-              >
-                Submit
-              </Button>
-          </Grid>
+          <Button
+            fullWidth
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={!isValid}
+            sx = {{marginTop: 2}}
+          >
+            Submit
+          </Button>
         </form>
       </Box>
     </Container>
